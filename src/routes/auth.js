@@ -1,23 +1,15 @@
 import { Router } from 'express';
-import { sendCode, verifyCode, logout } from '../telegramClient.js';
-import { getTelegramSettings } from '../supabase.js';
+import { sendCode, verifyCode, logout } from '../telegram.js';
+import { getTelegramSettings } from '../db.js';
 
 export const authRouter = Router();
 
 authRouter.post('/send-code', async (req, res) => {
   try {
-    const settings = await getTelegramSettings();
-    if (!settings?.api_id || !settings?.api_hash || !settings?.phone) {
-      throw new Error('Save your API ID, API Hash and phone number first.');
-    }
-    const result = await sendCode({
-      api_id: settings.api_id,
-      api_hash: settings.api_hash,
-      phone: settings.phone,
-    });
+    const result = await sendCode();
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.errorMessage || err.message });
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 

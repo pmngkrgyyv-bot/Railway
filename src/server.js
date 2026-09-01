@@ -3,8 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { authRouter } from './routes/auth.js';
 import { groupsRouter } from './routes/groups.js';
-import { downloadsRouter } from './routes/downloads.js';
-import { restoreSessionOnBoot } from './telegramClient.js';
+import { scanRouter } from './routes/scan.js';
+import { downloadRouter } from './routes/download.js';
 
 const app = express();
 app.use(express.json());
@@ -34,15 +34,10 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 app.use('/api/telegram', authRouter);
 app.use('/api/telegram/groups', groupsRouter);
-app.use('/api/telegram/download', downloadsRouter);
+app.use('/api/telegram/scan', scanRouter);
+app.use('/api/telegram/download', downloadRouter);
 
 const port = process.env.PORT || 8787;
 app.listen(port, () => {
   console.log(`Telegram userbot backend listening on port ${port}`);
-});
-
-// Reconnect a previously-saved Telegram session (if any) on boot, so a
-// Railway/Render restart doesn't silently drop the userbot connection.
-restoreSessionOnBoot().catch((err) => {
-  console.error('[startup] Failed to restore Telegram session:', err.message);
 });
